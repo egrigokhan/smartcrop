@@ -12,8 +12,8 @@ def detectEdges(image):
 def isolateUnique(image, edges):
   blocksize = 64
   varianceThreshold = 95
-  cellPx = image.shape[1] / blocksize
-  rows = image.shape[0] / cellPx
+  cellPx = int(image.shape[1] / blocksize)
+  rows = int(image.shape[0] / cellPx)
   cols = blocksize
   blockPx = cellPx * cellPx
   cellValues = [0] * (rows)
@@ -68,14 +68,14 @@ def isolateUnique(image, edges):
       pxDiff = True if (rdiff > varianceThreshold or gdiff > varianceThreshold or bdiff > varianceThreshold) else False
       isBlack = True if (cellValues[i][j][0] < 30 and cellValues[i][j][1] < 30 and cellValues[i][j][2] < 30) else False
       if pxDiff and ( isBlack == False):
-        cv2.rectangle(image, (cbeg,rbeg), (cend,rend), (255,255,255), -1)
+        cv2.rectangle(image, (int(cbeg),int(rbeg)), (int(cend),int(rend)), (255,255,255), -1)
       else:
-        cv2.rectangle(image, (cbeg,rbeg), (cend,rend), (0,0,0), -1)
+        cv2.rectangle(image, (int(cbeg),int(rbeg)), (int(cend),int(rend)), (0,0,0), -1)
   cv2.imwrite("blocks.png",image)
 
 def main(argv):
-  face_cascade = cv2.CascadeClassifier('haarcascade_frontalface_alt.xml')
-  eye_cascade = cv2.CascadeClassifier('haarcascade_eye.xml')
+  face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
+  eye_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_eye.xml')
   inputFile = ''
   outputFile = ''
   width = 300
@@ -83,7 +83,7 @@ def main(argv):
   blocksize = 64
   opts, args = getopt.getopt(argv,"hi:o:x:y:b:",["ifile=","ofile="])
   for opt, arg in opts:
-    print opt
+    print(opt)
     if opt == "-i":
       inputFile = arg
     if opt == "-o":
@@ -108,14 +108,14 @@ def main(argv):
       scaleFactor=1.1,
       minNeighbors=5,
       minSize=(30, 30),
-      flags = cv2.cv.CV_HAAR_SCALE_IMAGE
+      flags = cv2.CASCADE_SCALE_IMAGE
   )
   edgeRef = detectEdges(img)
   isolateUnique(img, edgeRef)
   maxFaceX = 0
   maxFaceCenter = 0
   maxFaceRight = 0
-  print "Found {0} faces!".format(len(faces))
+  print("Found {0} faces!".format(len(faces)))
 
   # crop positioning
   imHeight,imWidth = img.shape[:2]
@@ -154,7 +154,7 @@ def main(argv):
   width = int(width)
 
   rawCols = math.ceil( img.shape[1]*1.0 / int(width) )
-  print rawCols
+  print(rawCols)
   evaluateCols = int( rawCols)
 
   mostPosIndex = 0
@@ -172,8 +172,8 @@ def main(argv):
     if positiveCount > bestPosValue:
       mostPosIndex = i
       bestPosValue = positiveCount
-    print i, positiveCount
-  print "Best Index: ", str(mostPosIndex)
+    print(i, positiveCount)
+  print("Best Index: ", str(mostPosIndex))
   middleX = ( mostPosIndex * int(width) )
 
   if middleX + width > img.shape[1]:
@@ -181,7 +181,8 @@ def main(argv):
 
   cv2.rectangle(img, (middleX,middleY), (middleX+int(width),middleY+int(height)), (0,255,0), 2)
   outputDest = "output/"+outputFile
-  print outputDest
+  print(outputDest)
+  print("Crop box: ", middleX, middleY, middleX+int(width), middleY+int(height))
 
   cropped = copy.copy(original)
   copyName = "output/ref_"+outputFile
